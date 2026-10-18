@@ -562,8 +562,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Height dimension (side_b) left of vertical edge */}
               {renderDimensionLine('side_b', pC, pA, 42)}
 
-              {/* Hypotenuse dimension line (side c) along the diagonal */}
-              {renderDimensionLine('hypotenuse', pB, pC, -46)}
+              {/* Hypotenuse dimension line (side c) along the diagonal - placed OUTSIDE the triangle */}
+              {renderDimensionLine('hypotenuse', pB, pC, 46)}
 
               {/* Angle alpha at bottom-right corner pB */}
               {renderAngleArc('angle_alpha', pB, Math.PI, -(Math.atan2(b, a)), 36)}
@@ -738,8 +738,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Base dimension */}
               {renderDimensionLine('base', pLeft, pRight, 42)}
 
-              {/* Leg dimension */}
-              {renderDimensionLine('leg', pApex, pRight, -44)}
+              {/* Leg dimension (placed OUTSIDE the triangle) */}
+              {renderDimensionLine('leg', pRight, pApex, 44)}
 
               {/* Angles */}
               {renderAngleArc('angle_base', pLeft, 0, -baseAngleRad, 32, false, 'left')}
@@ -772,7 +772,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const pFoot: Point = { x: pC.x, y: 310 };
 
         return {
-          viewBox: '20 15 500 475',
+          viewBox: '20 15 510 475',
           elements: (
             <>
               <polygon
@@ -825,8 +825,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {renderDimensionLine('side_a', pA, pB, 42)}
               {/* Side b */}
               {renderDimensionLine('side_b', pC, pA, 42)}
-              {/* Side c */}
-              {renderDimensionLine('side_c', pB, pC, -42)}
+              {/* Side c (third side - placed OUTSIDE the triangle) */}
+              {renderDimensionLine('side_c', pB, pC, 44)}
 
               {/* Angles */}
               {renderAngleArc('angle_c', pA, 0, -gammaRad, 32)}
