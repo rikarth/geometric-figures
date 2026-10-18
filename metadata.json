@@ -1,0 +1,7 @@
+{
+  "name": "GeoDraft - Geometric Figure & Dimension Studio",
+  "description": "Create precise geometric figures with customizable parameters, dimension callouts, unit selection, and high-resolution image export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
