@@ -23,7 +23,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'angle_alpha', name: 'Base Angle (α)', symbol: 'α', type: 'angle', value: 36.87, isVisible: true, isDerived: true, precision: 1 },
       { id: 'angle_beta', name: 'Apex Angle (β)', symbol: 'β', type: 'angle', value: 53.13, isVisible: true, isDerived: true, precision: 1 },
       { id: 'altitude', name: 'Altitude to Hypotenuse', symbol: 'hc', type: 'length', value: 4.8, isVisible: false, isDerived: true, precision: 2 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 24, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 24, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 24, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -37,7 +37,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'side_a', name: 'Side Length (a)', symbol: 'a', type: 'length', value: 10, isVisible: true, min: 0.5, max: 100, step: 0.5, precision: 1 },
       { id: 'height', name: 'Height (h)', symbol: 'h', type: 'length', value: 8.66, isVisible: true, isDerived: true, precision: 2 },
       { id: 'angle_all', name: 'Interior Angles', symbol: 'θ', type: 'angle', value: 60, isVisible: true, isDerived: true, precision: 0 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 30, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 30, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 43.3, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -53,7 +53,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'height', name: 'Height (h)', symbol: 'h', type: 'length', value: 5.74, isVisible: true, isDerived: true, precision: 2 },
       { id: 'angle_base', name: 'Base Angles (α)', symbol: 'α', type: 'angle', value: 55.15, isVisible: true, isDerived: true, precision: 1 },
       { id: 'angle_vertex', name: 'Vertex Angle (β)', symbol: 'β', type: 'angle', value: 69.7, isVisible: true, isDerived: true, precision: 1 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 22, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 22, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 22.98, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -71,7 +71,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'angle_a', name: 'Angle (α)', symbol: 'α', type: 'angle', value: 74.62, isVisible: true, isDerived: true, precision: 1 },
       { id: 'angle_b', name: 'Angle (β)', symbol: 'β', type: 'angle', value: 50.38, isVisible: false, isDerived: true, precision: 1 },
       { id: 'height', name: 'Height (h)', symbol: 'h', type: 'length', value: 6.55, isVisible: true, isDerived: true, precision: 2 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 26.5, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 26.5, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 32.77, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -87,7 +87,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'width', name: 'Width / Base (w)', symbol: 'w', type: 'length', value: 12, isVisible: true, min: 1, max: 100, step: 0.5, precision: 1 },
       { id: 'height', name: 'Height / Length (h)', symbol: 'h', type: 'length', value: 7, isVisible: true, min: 1, max: 100, step: 0.5, precision: 1 },
       { id: 'diagonal', name: 'Diagonal (d)', symbol: 'd', type: 'length', value: 13.89, isVisible: true, isDerived: true, precision: 2 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 38, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 38, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 84, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -100,7 +100,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
     parameters: [
       { id: 'side', name: 'Side Length (s)', symbol: 's', type: 'length', value: 8, isVisible: true, min: 1, max: 100, step: 0.5, precision: 1 },
       { id: 'diagonal', name: 'Diagonal (d)', symbol: 'd', type: 'length', value: 11.31, isVisible: true, isDerived: true, precision: 2 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 32, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 32, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 64, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -117,7 +117,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'height', name: 'Height (h)', symbol: 'h', type: 'length', value: 5.2, isVisible: true, isDerived: true, precision: 2 },
       { id: 'diagonal_1', name: 'Long Diagonal (d1)', symbol: 'd1', type: 'length', value: 13.99, isVisible: true, isDerived: true, precision: 2 },
       { id: 'diagonal_2', name: 'Short Diagonal (d2)', symbol: 'd2', type: 'length', value: 8.72, isVisible: false, isDerived: true, precision: 2 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 32, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 32, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 51.96, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -133,7 +133,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'diagonal_1', name: 'Major Diagonal (d1)', symbol: 'd1', type: 'length', value: 13.86, isVisible: true, isDerived: true, precision: 2 },
       { id: 'diagonal_2', name: 'Minor Diagonal (d2)', symbol: 'd2', type: 'length', value: 8, isVisible: true, isDerived: true, precision: 2 },
       { id: 'height', name: 'Height (h)', symbol: 'h', type: 'length', value: 6.93, isVisible: false, isDerived: true, precision: 2 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 32, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 32, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 55.43, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -150,7 +150,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'offset', name: 'Left Inset (x)', symbol: 'x', type: 'length', value: 3, isVisible: false, min: 0, max: 10, step: 0.5, precision: 1 },
       { id: 'leg_left', name: 'Left Leg (c)', symbol: 'c', type: 'length', value: 5.83, isVisible: true, isDerived: true, precision: 2 },
       { id: 'leg_right', name: 'Right Leg (d)', symbol: 'd', type: 'length', value: 5.83, isVisible: true, isDerived: true, precision: 2 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 29.66, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 29.66, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 45, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -180,7 +180,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'semi_minor', name: 'Semi-Minor Axis (b)', symbol: 'b', type: 'length', value: 5, isVisible: true, min: 1, max: 100, step: 0.5, precision: 1 },
       { id: 'focal_distance', name: 'Focal Distance (c)', symbol: 'c', type: 'length', value: 6.24, isVisible: true, isDerived: true, precision: 2 },
       { id: 'eccentricity', name: 'Eccentricity (e)', symbol: 'e', type: 'count', value: 0.78, isVisible: false, isDerived: true, precision: 2 },
-      { id: 'perimeter', name: 'Circumference (approx)', symbol: 'C', type: 'length', value: 41.51, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Circumference (approx)', symbol: 'C', type: 'length', value: 41.51, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 125.66, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -195,7 +195,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'central_angle', name: 'Central Angle (θ)', symbol: 'θ', type: 'angle', value: 72, isVisible: true, min: 10, max: 350, step: 1, precision: 1 },
       { id: 'arc_length', name: 'Arc Length (L)', symbol: 'L', type: 'length', value: 8.8, isVisible: true, isDerived: true, precision: 2 },
       { id: 'chord_length', name: 'Chord Length (c)', symbol: 'c', type: 'length', value: 8.23, isVisible: true, isDerived: true, precision: 2 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 22.8, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 22.8, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Sector Area', symbol: 'A', type: 'area', value: 30.79, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -210,10 +210,12 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
     parameters: [
       { id: 'num_sides', name: 'Number of Sides (n)', symbol: 'n', type: 'count', value: 6, isVisible: true, min: 3, max: 12, step: 1, precision: 0 },
       { id: 'side_length', name: 'Side Length (s)', symbol: 's', type: 'length', value: 6, isVisible: true, min: 1, max: 100, step: 0.5, precision: 1 },
-      { id: 'circumradius', name: 'Circumradius (R)', symbol: 'R', type: 'length', value: 6, isVisible: true, isDerived: true, precision: 2 },
-      { id: 'apothem', name: 'Apothem / Inradius (r)', symbol: 'r', type: 'length', value: 5.2, isVisible: true, isDerived: true, precision: 2 },
-      { id: 'interior_angle', name: 'Interior Angle (θ)', symbol: 'θ', type: 'angle', value: 120, isVisible: true, isDerived: true, precision: 1 },
-      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 36, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'full_width', name: 'Full Width (W)', symbol: 'W', type: 'length', value: 12, isVisible: true, isDerived: true, precision: 2 },
+      { id: 'full_height', name: 'Full Height (H)', symbol: 'H', type: 'length', value: 10.39, isVisible: true, isDerived: true, precision: 2 },
+      { id: 'circumradius', name: 'Circumradius (R)', symbol: 'R', type: 'length', value: 6, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'apothem', name: 'Apothem / Inradius (r)', symbol: 'r', type: 'length', value: 5.2, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'interior_angle', name: 'Interior Angle (θ)', symbol: 'θ', type: 'angle', value: 120, isVisible: false, isDerived: true, precision: 1 },
+      { id: 'perimeter', name: 'Perimeter', symbol: 'P', type: 'length', value: 36, isVisible: true, isDerived: true, precision: 2 },
       { id: 'area', name: 'Area', symbol: 'A', type: 'area', value: 93.53, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -230,7 +232,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'width', name: 'Width / Depth (w)', symbol: 'w', type: 'length', value: 5, isVisible: true, min: 1, max: 100, step: 0.5, precision: 1 },
       { id: 'height', name: 'Height (h)', symbol: 'h', type: 'length', value: 6, isVisible: true, min: 1, max: 100, step: 0.5, precision: 1 },
       { id: 'space_diagonal', name: 'Space Diagonal (d)', symbol: 'd', type: 'length', value: 11.92, isVisible: true, isDerived: true, precision: 2 },
-      { id: 'surface_area', name: 'Surface Area', symbol: 'SA', type: 'area', value: 258, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'surface_area', name: 'Surface Area', symbol: 'SA', type: 'area', value: 258, isVisible: true, isDerived: true, precision: 2 },
       { id: 'volume', name: 'Volume', symbol: 'V', type: 'volume', value: 270, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -244,7 +246,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'radius', name: 'Base Radius (r)', symbol: 'r', type: 'length', value: 4, isVisible: true, min: 1, max: 50, step: 0.5, precision: 1 },
       { id: 'diameter', name: 'Base Diameter (d)', symbol: 'd', type: 'length', value: 8, isVisible: true, isDerived: true, precision: 1 },
       { id: 'height', name: 'Height (h)', symbol: 'h', type: 'length', value: 10, isVisible: true, min: 1, max: 100, step: 0.5, precision: 1 },
-      { id: 'surface_area', name: 'Total Surface Area', symbol: 'SA', type: 'area', value: 351.86, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'surface_area', name: 'Total Surface Area', symbol: 'SA', type: 'area', value: 351.86, isVisible: true, isDerived: true, precision: 2 },
       { id: 'volume', name: 'Volume', symbol: 'V', type: 'volume', value: 502.65, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -258,7 +260,7 @@ export const INITIAL_FIGURES: FigureDefinition[] = [
       { id: 'radius', name: 'Base Radius (r)', symbol: 'r', type: 'length', value: 5, isVisible: true, min: 1, max: 50, step: 0.5, precision: 1 },
       { id: 'height', name: 'Altitude / Height (h)', symbol: 'h', type: 'length', value: 8, isVisible: true, min: 1, max: 100, step: 0.5, precision: 1 },
       { id: 'slant_height', name: 'Slant Height (s)', symbol: 's', type: 'length', value: 9.43, isVisible: true, isDerived: true, precision: 2 },
-      { id: 'surface_area', name: 'Total Surface Area', symbol: 'SA', type: 'area', value: 226.73, isVisible: false, isDerived: true, precision: 2 },
+      { id: 'surface_area', name: 'Total Surface Area', symbol: 'SA', type: 'area', value: 226.73, isVisible: true, isDerived: true, precision: 2 },
       { id: 'volume', name: 'Volume', symbol: 'V', type: 'volume', value: 209.44, isVisible: true, isDerived: true, precision: 2 },
     ],
   },
@@ -483,9 +485,31 @@ export function recalculateParameters(figureId: FigureId, currentParams: Paramet
       const perimeter = n * s;
       const area = 0.5 * n * s * apothem;
 
+      // Calculate bounding box extents matching the renderer's orientation
+      const startOffsetAngle = -Math.PI / 2 + Math.PI / n;
+      let minCos = Infinity;
+      let maxCos = -Infinity;
+      let minSin = Infinity;
+      let maxSin = -Infinity;
+
+      for (let i = 0; i < n; i++) {
+        const angle = startOffsetAngle + (i * 2 * Math.PI) / n;
+        const c = Math.cos(angle);
+        const sn = Math.sin(angle);
+        if (c < minCos) minCos = c;
+        if (c > maxCos) maxCos = c;
+        if (sn < minSin) minSin = sn;
+        if (sn > maxSin) maxSin = sn;
+      }
+
+      const fullWidth = circumradius * (maxCos - minCos);
+      const fullHeight = circumradius * (maxSin - minSin);
+
       updatedValues.num_sides = n;
       updatedValues.apothem = apothem;
       updatedValues.circumradius = circumradius;
+      updatedValues.full_width = fullWidth;
+      updatedValues.full_height = fullHeight;
       updatedValues.interior_angle = interiorAngle;
       updatedValues.perimeter = perimeter;
       updatedValues.area = area;

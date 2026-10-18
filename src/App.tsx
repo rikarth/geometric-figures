@@ -7,7 +7,7 @@ import {
   ThemeId,
   Unit,
 } from './types/geometry';
-import { INITIAL_FIGURES, recalculateParameters, convertUnit } from './utils/geometryMath';
+import { INITIAL_FIGURES, recalculateParameters, convertUnit, formatValue } from './utils/geometryMath';
 import { THEMES } from './utils/themes';
 import { Header } from './components/Header';
 import { FigureSelector } from './components/FigureSelector';
@@ -305,6 +305,79 @@ export default function App() {
               onToggleParamVisibility={handleToggleVisibility}
             />
           </div>
+
+          {/* Area and Perimeter Bar - Shown below the figure and below any other data or arrow */}
+          {(() => {
+            const areaParam = currentFigure.parameters.find(
+              (p) => p.id === 'area' || p.id === 'surface_area'
+            );
+            const perimParam = currentFigure.parameters.find(
+              (p) => p.id === 'perimeter' || p.id === 'circumference' || p.id === 'volume'
+            );
+
+            if (!areaParam && !perimParam) return null;
+
+            return (
+              <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-2.5 border-t border-slate-200 bg-slate-50/70">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                    Calculated Metrics:
+                  </span>
+                  <span className="text-[11px] text-slate-400 hidden md:inline">
+                    (Click badge to toggle visibility on exported image)
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {areaParam && (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleVisibility(areaParam.id)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+                        areaParam.isVisible
+                          ? 'bg-blue-50 border-blue-200 text-blue-900 shadow-2xs hover:bg-blue-100'
+                          : 'bg-white border-slate-200 text-slate-400 line-through opacity-70 hover:opacity-100'
+                      }`}
+                      title={areaParam.isVisible ? 'Visible in image (Click to hide)' : 'Hidden (Click to show in image)'}
+                    >
+                      <span className="font-sans font-semibold text-[11px] text-slate-600">
+                        {areaParam.name}:
+                      </span>
+                      <strong className="font-bold text-blue-700">
+                        {formatValue(areaParam.value, areaParam.type, unit, areaParam.precision ?? 2)}
+                      </strong>
+                      <span className="text-[10px] text-slate-400 font-sans">
+                        {areaParam.isVisible ? '✓ in image' : 'hidden'}
+                      </span>
+                    </button>
+                  )}
+
+                  {perimParam && (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleVisibility(perimParam.id)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+                        perimParam.isVisible
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-900 shadow-2xs hover:bg-emerald-100'
+                          : 'bg-white border-slate-200 text-slate-400 line-through opacity-70 hover:opacity-100'
+                      }`}
+                      title={perimParam.isVisible ? 'Visible in image (Click to hide)' : 'Hidden (Click to show in image)'}
+                    >
+                      <span className="font-sans font-semibold text-[11px] text-slate-600">
+                        {perimParam.name}:
+                      </span>
+                      <strong className="font-bold text-emerald-700">
+                        {formatValue(perimParam.value, perimParam.type, unit, perimParam.precision ?? 2)}
+                      </strong>
+                      <span className="text-[10px] text-slate-400 font-sans">
+                        {perimParam.isVisible ? '✓ in image' : 'hidden'}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Canvas Footer Status & Instruction Bar */}
           <div className="flex items-center justify-between px-5 py-2.5 border-t border-slate-200 bg-slate-50/80 text-[11px] text-slate-500">

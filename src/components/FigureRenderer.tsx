@@ -56,6 +56,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
       overrideLabel?: string;
       labelSide?: 'auto' | 'inside' | 'outside';
       alwaysVisible?: boolean;
+      keySuffix?: string;
     }
   ) => {
     const param = getParam(paramId);
@@ -94,9 +95,11 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
     const labelBoxW = Math.max(38, labelText.length * 7.5 + 14);
     const labelBoxH = 22;
 
+    const elementKey = options?.keySuffix ? `dim-${paramId}-${options.keySuffix}` : `dim-${paramId}`;
+
     return (
       <g
-        key={`dim-${paramId}`}
+        key={elementKey}
         className="group cursor-pointer select-none"
         onMouseEnter={() => onHoverParam?.(paramId)}
         onMouseLeave={() => onHoverParam?.(null)}
@@ -176,7 +179,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
     startAngleRad: number,
     sweepAngleRad: number,
     arcRadius = 28,
-    isRightAngle = false
+    isRightAngle = false,
+    keySuffix?: string
   ) => {
     const param = getParam(paramId);
     if (!param) return null;
@@ -184,6 +188,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
 
     const isHovered = hoveredParamId === paramId;
     const labelText = formatLabel(param, unit, labelStyle);
+    const elementKey = keySuffix ? `angle-${paramId}-${keySuffix}` : `angle-${paramId}`;
 
     if (isRightAngle) {
       // Draw standard square corner symbol
@@ -199,7 +204,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
 
       return (
         <g
-          key={`angle-${paramId}`}
+          key={elementKey}
           className="cursor-pointer"
           onMouseEnter={() => onHoverParam?.(paramId)}
           onMouseLeave={() => onHoverParam?.(null)}
@@ -243,7 +248,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
 
     return (
       <g
-        key={`angle-${paramId}`}
+        key={elementKey}
         className="group cursor-pointer select-none"
         onMouseEnter={() => onHoverParam?.(paramId)}
         onMouseLeave={() => onHoverParam?.(null)}
@@ -286,43 +291,104 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
     );
   };
 
-  // Helper to render interior Area Badge
-  const renderAreaBadge = (x: number, y: number, areaParamId = 'area', volumeParamId?: string) => {
+  // Helper to render Area & Perimeter badges below the entire figure and below any other data or arrow
+  const renderBottomMetrics = (
+    centerX: number,
+    bottomY: number,
+    options?: {
+      areaId?: string;
+      perimeterId?: string;
+    }
+  ) => {
+    const areaParamId = options?.areaId ?? (figure.category === '3d' ? 'surface_area' : 'area');
+    const perimParamId = options?.perimeterId ?? (
+      figure.category === '3d'
+        ? 'volume'
+        : figure.id === 'circle'
+          ? 'circumference'
+          : 'perimeter'
+    );
+
     const areaParam = getParam(areaParamId);
-    const volParam = volumeParamId ? getParam(volumeParamId) : undefined;
+    const perimParam = getParam(perimParamId);
 
     const showArea = areaParam && areaParam.isVisible;
-    const showVol = volParam && volParam.isVisible;
+    const showPerim = perimParam && perimParam.isVisible;
 
-    if (!showArea && !showVol) return null;
+    if (!showArea && !showPerim) return null;
 
     const isAreaHovered = hoveredParamId === areaParamId;
-    const isVolHovered = volParam && hoveredParamId === volumeParamId;
+    const isPerimHovered = hoveredParamId === perimParamId;
+
+    const formatMetricText = (param: Parameter) => {
+      const valStr = formatValue(param.value, param.type, unit, param.precision ?? 2);
+      if (labelStyle === 'value_only') {
+        return `${param.name}: ${valStr}`;
+      }
+      if (labelStyle === 'full_name_and_value') {
+        return `${param.name} = ${valStr}`;
+      }
+      return `${param.name} (${param.symbol}) = ${valStr}`;
+    };
+
+    const areaText = areaParam ? formatMetricText(areaParam) : '';
+    const perimText = perimParam ? formatMetricText(perimParam) : '';
+
+    const areaBoxW = Math.max(110, areaText.length * 7.5 + 24);
+    const perimBoxW = Math.max(110, perimText.length * 7.5 + 24);
+    const boxH = 28;
+    const gap = 16;
+
+    let areaX = centerX;
+    let perimX = centerX;
+
+    if (showArea && showPerim) {
+      const totalWidth = areaBoxW + gap + perimBoxW;
+      areaX = centerX - totalWidth / 2 + areaBoxW / 2;
+      perimX = centerX + totalWidth / 2 - perimBoxW / 2;
+    }
 
     return (
-      <g className="select-none">
+      <g key="bottom-metrics-group" className="select-none">
+        {/* Subtle decorative separator hairline strictly below all figure elements, data, and arrows */}
+        <line
+          x1={centerX - 160}
+          y1={bottomY - 22}
+          x2={centerX + 160}
+          y2={bottomY - 22}
+          stroke={theme.gridColor}
+          strokeWidth="1.25"
+          strokeDasharray="4 4"
+          opacity="0.9"
+        />
+
+        {/* Area / Surface Area Badge */}
         {showArea && (
           <g
-            transform={`translate(${x}, ${showVol ? y - 13 : y})`}
-            className="cursor-pointer"
+            key={`bottom-metric-${areaParamId}`}
+            transform={`translate(${areaX}, ${bottomY})`}
+            className="cursor-pointer group"
             onMouseEnter={() => onHoverParam?.(areaParamId)}
             onMouseLeave={() => onHoverParam?.(null)}
-            onClick={() => onToggleParamVisibility?.(areaParamId)}
+            onClick={() => {
+              onSelectParam?.(areaParamId);
+              onToggleParamVisibility?.(areaParamId);
+            }}
           >
             <rect
-              x="-46"
-              y="-11"
-              width="92"
-              height="22"
-              rx="4"
+              x={-areaBoxW / 2}
+              y={-boxH / 2}
+              width={areaBoxW}
+              height={boxH}
+              rx="6"
               fill={isAreaHovered ? theme.accent : theme.dimensionBg}
               stroke={isAreaHovered ? '#ffffff' : theme.dimensionLine}
-              strokeWidth="1"
-              strokeDasharray="2 2"
+              strokeWidth={isAreaHovered ? '2' : '1.25'}
+              className="transition-colors duration-150"
             />
             <text
               x="0"
-              y="4"
+              y="4.5"
               textAnchor="middle"
               fill={isAreaHovered ? '#ffffff' : theme.dimensionText}
               fontSize="11"
@@ -330,40 +396,46 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               fontWeight="600"
               className="pointer-events-none"
             >
-              {formatLabel(areaParam, unit, labelStyle)}
+              {areaText}
             </text>
           </g>
         )}
-        {showVol && (
+
+        {/* Perimeter / Circumference / Volume Badge */}
+        {showPerim && (
           <g
-            transform={`translate(${x}, ${showArea ? y + 13 : y})`}
-            className="cursor-pointer"
-            onMouseEnter={() => onHoverParam?.(volumeParamId!)}
+            key={`bottom-metric-${perimParamId}`}
+            transform={`translate(${perimX}, ${bottomY})`}
+            className="cursor-pointer group"
+            onMouseEnter={() => onHoverParam?.(perimParamId)}
             onMouseLeave={() => onHoverParam?.(null)}
-            onClick={() => onToggleParamVisibility?.(volumeParamId!)}
+            onClick={() => {
+              onSelectParam?.(perimParamId);
+              onToggleParamVisibility?.(perimParamId);
+            }}
           >
             <rect
-              x="-48"
-              y="-11"
-              width="96"
-              height="22"
-              rx="4"
-              fill={isVolHovered ? theme.accent : theme.dimensionBg}
-              stroke={isVolHovered ? '#ffffff' : theme.dimensionLine}
-              strokeWidth="1"
-              strokeDasharray="2 2"
+              x={-perimBoxW / 2}
+              y={-boxH / 2}
+              width={perimBoxW}
+              height={boxH}
+              rx="6"
+              fill={isPerimHovered ? theme.accent : theme.dimensionBg}
+              stroke={isPerimHovered ? '#ffffff' : theme.dimensionLine}
+              strokeWidth={isPerimHovered ? '2' : '1.25'}
+              className="transition-colors duration-150"
             />
             <text
               x="0"
-              y="4"
+              y="4.5"
               textAnchor="middle"
-              fill={isVolHovered ? '#ffffff' : theme.dimensionText}
+              fill={isPerimHovered ? '#ffffff' : theme.dimensionText}
               fontSize="11"
               fontFamily="JetBrains Mono, monospace"
               fontWeight="600"
               className="pointer-events-none"
             >
-              {formatLabel(volParam!, unit, labelStyle)}
+              {perimText}
             </text>
           </g>
         )}
@@ -425,7 +497,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         };
 
         return {
-          viewBox: '-20 -20 540 430',
+          viewBox: '-20 -20 540 485',
           elements: (
             <>
               {/* Right angle marker at corner A */}
@@ -499,8 +571,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Angle beta at top apex pC */}
               {renderAngleArc('angle_beta', pC, Math.PI / 2, -(Math.PI / 2 - Math.atan2(b, a)), 34)}
 
-              {/* Area Badge in interior center */}
-              {renderAreaBadge(pA.x + a / 3, pA.y - b / 3, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(pA.x + a / 2, 415)}
             </>
           ),
         };
@@ -520,7 +592,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const showHeight = isVis('height');
 
         return {
-          viewBox: '20 20 460 380',
+          viewBox: '20 15 460 475',
           elements: (
             <>
               {/* Shape polygon */}
@@ -582,11 +654,11 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {renderDimensionLine('side_a', pLeft, pRight, 42)}
 
               {/* Angles at vertices */}
-              {renderAngleArc('angle_all', pLeft, 0, -(Math.PI / 3), 32)}
-              {renderAngleArc('angle_all', pRight, Math.PI, Math.PI / 3, 32)}
+              {renderAngleArc('angle_all', pLeft, 0, -(Math.PI / 3), 32, false, 'left')}
+              {renderAngleArc('angle_all', pRight, Math.PI, Math.PI / 3, 32, false, 'right')}
 
-              {/* Area Badge */}
-              {renderAreaBadge(250, 310 - h / 3, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(250, 415)}
             </>
           ),
         };
@@ -609,7 +681,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const baseAngleRad = Math.atan2(h, b / 2);
 
         return {
-          viewBox: '20 20 460 380',
+          viewBox: '20 15 460 475',
           elements: (
             <>
               <polygon
@@ -670,12 +742,12 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {renderDimensionLine('leg', pApex, pRight, -44)}
 
               {/* Angles */}
-              {renderAngleArc('angle_base', pLeft, 0, -baseAngleRad, 32)}
-              {renderAngleArc('angle_base', pRight, Math.PI, baseAngleRad, 32)}
+              {renderAngleArc('angle_base', pLeft, 0, -baseAngleRad, 32, false, 'left')}
+              {renderAngleArc('angle_base', pRight, Math.PI, baseAngleRad, 32, false, 'right')}
               {renderAngleArc('angle_vertex', pApex, Math.PI / 2 + (Math.PI / 2 - baseAngleRad), -(Math.PI - 2 * baseAngleRad), 32)}
 
-              {/* Area Badge */}
-              {renderAreaBadge(250, 310 - h / 3, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(250, 415)}
             </>
           ),
         };
@@ -700,7 +772,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const pFoot: Point = { x: pC.x, y: 310 };
 
         return {
-          viewBox: '20 30 500 370',
+          viewBox: '20 15 500 475',
           elements: (
             <>
               <polygon
@@ -759,8 +831,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Angles */}
               {renderAngleArc('angle_c', pA, 0, -gammaRad, 32)}
 
-              {/* Area Badge */}
-              {renderAreaBadge((pA.x + pB.x + pC.x) / 3, (pA.y + pB.y + pC.y) / 3, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(100 + a / 2, 415)}
             </>
           ),
         };
@@ -784,8 +856,12 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
 
         const showDiagonal = isVis('diagonal');
 
+        const bottomDimY = y0 + h + 42;
+        const bottomMetricsY = bottomDimY + 54;
+        const totalHeight = bottomMetricsY + 44;
+
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `20 15 460 ${totalHeight}`,
           elements: (
             <>
               {/* Right angle corner indicators */}
@@ -851,8 +927,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Height dimension (left) */}
               {renderDimensionLine('height', pTL, pBL, 42)}
 
-              {/* Area Badge at center */}
-              {renderAreaBadge(250, showDiagonal ? 220 + 20 : 220, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(250, bottomMetricsY)}
             </>
           ),
         };
@@ -871,9 +947,12 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const pBL = { x: x0, y: y0 + s };
 
         const showDiagonal = isVis('diagonal');
+        const bottomDimY = y0 + s + 42;
+        const bottomMetricsY = bottomDimY + 54;
+        const totalHeight = bottomMetricsY + 44;
 
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `20 15 460 ${totalHeight}`,
           elements: (
             <>
               {renderRightAngleSquare(pBL, 1, -1, 12)}
@@ -933,11 +1012,11 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               )}
 
               {/* Side dimension */}
-              {renderDimensionLine('side', pBL, pBR, 42)}
-              {renderDimensionLine('side', pTL, pBL, 42)}
+              {renderDimensionLine('side', pBL, pBR, 42, { keySuffix: 'bottom' })}
+              {renderDimensionLine('side', pTL, pBL, 42, { keySuffix: 'left' })}
 
-              {/* Area Badge */}
-              {renderAreaBadge(250, showDiagonal ? 210 + 20 : 210, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(250, bottomMetricsY)}
             </>
           ),
         };
@@ -964,8 +1043,12 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const showHeight = isVis('height');
         const pHFoot = { x: pTL.x, y: pBL.y };
 
+        const bottomDimY = pBL.y + 42;
+        const bottomMetricsY = bottomDimY + 54;
+        const totalHeight = bottomMetricsY + 44;
+
         return {
-          viewBox: '20 30 500 370',
+          viewBox: `20 15 500 ${totalHeight}`,
           elements: (
             <>
               <polygon
@@ -1036,8 +1119,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
                 />
               )}
 
-              {/* Area Badge */}
-              {renderAreaBadge((pBL.x + pTR.x) / 2, (pBL.y + pTL.y) / 2, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(100 + b / 2 + xOffset / 2, bottomMetricsY)}
             </>
           ),
         };
@@ -1058,8 +1141,13 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const pBottom = { x: cX, y: cY + halfD2 };
         const pLeft = { x: cX - halfD1, y: cY };
 
+        const len = Math.hypot(halfD1, halfD2);
+        const maxShapeArrowY = pBottom.y + (halfD1 / len) * 44;
+        const bottomMetricsY = Math.max(340, maxShapeArrowY + 52);
+        const totalHeight = bottomMetricsY + 44;
+
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `20 15 460 ${totalHeight}`,
           elements: (
             <>
               {/* Diagonals interior lines */}
@@ -1092,15 +1180,15 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
                 strokeLinejoin="round"
               />
 
-              {/* Side dimension on bottom-right edge */}
-              {renderDimensionLine('side', pRight, pBottom, 42)}
+              {/* Side dimension on bottom-right edge pointing outward */}
+              {renderDimensionLine('side', pBottom, pRight, 38)}
 
               {/* Diagonals dimensions */}
               {renderDimensionLine('diagonal_1', pLeft, pRight, -halfD2 - 28)}
               {renderDimensionLine('diagonal_2', pBottom, pTop, halfD1 + 28)}
 
-              {/* Area Badge */}
-              {renderAreaBadge(cX + 24, cY - 24, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(250, bottomMetricsY)}
             </>
           ),
         };
@@ -1126,8 +1214,12 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const showHeight = isVis('height');
         const pHFoot = { x: pTL.x, y: pBL.y };
 
+        const bottomDimY = pBL.y + 42;
+        const bottomMetricsY = bottomDimY + 54;
+        const totalHeight = bottomMetricsY + 44;
+
         return {
-          viewBox: '20 30 500 370',
+          viewBox: `20 15 500 ${totalHeight}`,
           elements: (
             <>
               <polygon
@@ -1188,8 +1280,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Right leg */}
               {renderDimensionLine('leg_right', pBR, pTR, 42)}
 
-              {/* Area Badge */}
-              {renderAreaBadge((pBL.x + pBR.x) / 2, 280 - h / 2, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(100 + b / 2, bottomMetricsY)}
             </>
           ),
         };
@@ -1210,9 +1302,12 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
 
         // Center marker (+)
         const cCross = 8;
+        const bottomCircleY = cY + r;
+        const bottomMetricsY = bottomCircleY + 54;
+        const totalHeight = bottomMetricsY + 44;
 
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `20 15 460 ${totalHeight}`,
           elements: (
             <>
               {/* Main Circle */}
@@ -1331,8 +1426,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
                 </g>
               )}
 
-              {/* Area & Circumference Badges */}
-              {renderAreaBadge(cX, cY + 45, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(cX, bottomMetricsY, { perimeterId: 'circumference' })}
             </>
           ),
         };
@@ -1351,9 +1446,12 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const showFocal = isVis('focal_distance');
 
         const focalDistPx = Math.sqrt(Math.max(0, rX * rX - rY * rY));
+        const bottomEllipseY = cY + rY;
+        const bottomMetricsY = bottomEllipseY + 54;
+        const totalHeight = bottomMetricsY + 44;
 
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `20 15 460 ${totalHeight}`,
           elements: (
             <>
               {/* Ellipse curve */}
@@ -1369,7 +1467,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
 
               {/* Center Crosshair */}
               <line x1={cX - 8} y1={cY} x2={cX + 8} y2={cY} stroke={theme.dimensionLine} strokeWidth="1.5" />
-              <line x1={cX} y1={cY - 8} x2={cX} y2={cY + 8} stroke={theme.dimensionLine} strokeWidth="1.5" />
+              <line x1={cX} y1={cY - 8} x2={cX + 8} y2={cY + 8} stroke={theme.dimensionLine} strokeWidth="1.5" />
 
               {/* Foci points */}
               {showFocal && (
@@ -1433,8 +1531,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
                 </g>
               )}
 
-              {/* Area Badge */}
-              {renderAreaBadge(cX, cY + 36, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(cX, bottomMetricsY, { perimeterId: 'perimeter' })}
             </>
           ),
         };
@@ -1457,8 +1555,14 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const showArc = isVis('arc_length');
         const showChord = isVis('chord_length');
 
+        // Dynamically compute the lowest Y coordinate of the sector including arc and radius arrow
+        const arcBottomY = theta > 180 ? cY + r : Math.max(cY, pEdge2.y);
+        const maxSectorArrowY = Math.max(arcBottomY, cY + 52);
+        const bottomMetricsY = maxSectorArrowY + 54;
+        const totalHeight = bottomMetricsY + 44;
+
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `20 15 460 ${totalHeight}`,
           elements: (
             <>
               {/* Sector Path */}
@@ -1507,8 +1611,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
                 </g>
               )}
 
-              {/* Area Badge */}
-              {renderAreaBadge(cX + (r * 0.45) * Math.cos(-thetaRad / 2), cY + (r * 0.45) * Math.sin(-thetaRad / 2), 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(cX, bottomMetricsY)}
             </>
           ),
         };
@@ -1533,6 +1637,18 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
 
         const ptsString = pts.map((pt) => `${pt.x},${pt.y}`).join(' ');
 
+        // Extents (bounding box)
+        const minX = Math.min(...pts.map((pt) => pt.x));
+        const maxX = Math.max(...pts.map((pt) => pt.x));
+        const minY = Math.min(...pts.map((pt) => pt.y));
+        const maxY = Math.max(...pts.map((pt) => pt.y));
+
+        // Extreme vertices
+        const minXPt = pts.find((pt) => Math.abs(pt.x - minX) < 0.001) ?? { x: minX, y: cY };
+        const maxXPt = pts.find((pt) => Math.abs(pt.x - maxX) < 0.001) ?? { x: maxX, y: cY };
+        const topPt = pts.filter((pt) => Math.abs(pt.y - minY) < 0.001).sort((a, b) => a.x - b.x)[0] ?? { x: cX, y: minY };
+        const bottomPt = pts.filter((pt) => Math.abs(pt.y - maxY) < 0.001).sort((a, b) => a.x - b.x)[0] ?? { x: cX, y: maxY };
+
         // Apothem: line from center to midpoint of bottom edge
         // Find bottom-most edge (highest Y coordinates)
         let bottomIdx = 0;
@@ -1551,11 +1667,81 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
 
         const showApothem = isVis('apothem');
         const showCircumradius = isVis('circumradius');
+        const showFullWidth = isVis('full_width');
+        const showFullHeight = isVis('full_height');
+
+        // Dynamically compute max Y of all vertices & bottom side dimension arrow
+        const maxVertexY = maxY;
+        const maxPolygonArrowY = Math.max(maxVertexY, midBottom.y + 44);
+        const bottomMetricsY = maxPolygonArrowY + 54;
+        const totalHeight = bottomMetricsY + 44;
 
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `10 10 480 ${totalHeight}`,
           elements: (
             <>
+              {/* Full Width projection guide lines & dimension line (top) */}
+              {showFullWidth && (
+                <g key="full-width-group">
+                  {minXPt.y > minY && (
+                    <line
+                      x1={minX}
+                      y1={minXPt.y}
+                      x2={minX}
+                      y2={minY}
+                      stroke={theme.dimensionLine}
+                      strokeWidth="1"
+                      strokeDasharray="3 3"
+                      opacity="0.5"
+                    />
+                  )}
+                  {maxXPt.y > minY && (
+                    <line
+                      x1={maxX}
+                      y1={maxXPt.y}
+                      x2={maxX}
+                      y2={minY}
+                      stroke={theme.dimensionLine}
+                      strokeWidth="1"
+                      strokeDasharray="3 3"
+                      opacity="0.5"
+                    />
+                  )}
+                  {renderDimensionLine('full_width', { x: minX, y: minY }, { x: maxX, y: minY }, -38)}
+                </g>
+              )}
+
+              {/* Full Height projection guide lines & dimension line (left) */}
+              {showFullHeight && (
+                <g key="full-height-group">
+                  {topPt.x > minX && (
+                    <line
+                      x1={minX}
+                      y1={minY}
+                      x2={topPt.x}
+                      y2={minY}
+                      stroke={theme.dimensionLine}
+                      strokeWidth="1"
+                      strokeDasharray="3 3"
+                      opacity="0.5"
+                    />
+                  )}
+                  {bottomPt.x > minX && (
+                    <line
+                      x1={minX}
+                      y1={maxY}
+                      x2={bottomPt.x}
+                      y2={maxY}
+                      stroke={theme.dimensionLine}
+                      strokeWidth="1"
+                      strokeDasharray="3 3"
+                      opacity="0.5"
+                    />
+                  )}
+                  {renderDimensionLine('full_height', { x: minX, y: minY }, { x: minX, y: maxY }, 42)}
+                </g>
+              )}
+
               {/* Polygon outline */}
               <polygon
                 points={ptsString}
@@ -1614,8 +1800,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Side length dimension along bottom edge */}
               {renderDimensionLine('side_length', bP1, bP2, 36)}
 
-              {/* Area Badge at center */}
-              {renderAreaBadge(cX, cY - 25, 'area')}
+              {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(cX, bottomMetricsY)}
             </>
           ),
         };
@@ -1656,9 +1842,12 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const pBack = { x: p0.x + w * cosIso, y: p0.y - w * sinIso };
 
         const showDiagonal = isVis('space_diagonal');
+        const bottomDimY = p0.y + 40;
+        const bottomMetricsY = bottomDimY + 54;
+        const totalHeight = bottomMetricsY + 44;
 
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `20 15 460 ${totalHeight}`,
           elements: (
             <>
               {/* Hidden Back Edges (dashed) */}
@@ -1723,8 +1912,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Width / Depth dimension along top right edge */}
               {renderDimensionLine('width', p2, p5, -34)}
 
-              {/* Volume Badge */}
-              {renderAreaBadge((p0.x + p1.x) / 2, (p0.y + p3.y) / 2, 'surface_area', 'volume')}
+              {/* Surface Area and Volume strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics((p0.x + p1.x) / 2, bottomMetricsY, { areaId: 'surface_area', perimeterId: 'volume' })}
             </>
           ),
         };
@@ -1743,9 +1932,12 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
 
         const showRadius = isVis('radius');
         const showDiameter = isVis('diameter');
+        const bottomCylinderY = botY + rY;
+        const bottomMetricsY = bottomCylinderY + 54;
+        const totalHeight = bottomMetricsY + 44;
 
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `20 15 460 ${totalHeight}`,
           elements: (
             <>
               {/* Bottom dashed back ellipse */}
@@ -1814,8 +2006,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Height dimension line (right side) */}
               {renderDimensionLine('height', { x: cX + rX, y: topY }, { x: cX + rX, y: botY }, -36)}
 
-              {/* Volume Badge */}
-              {renderAreaBadge(cX, topY + h / 2, 'surface_area', 'volume')}
+              {/* Surface Area and Volume strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(cX, bottomMetricsY, { areaId: 'surface_area', perimeterId: 'volume' })}
             </>
           ),
         };
@@ -1840,8 +2032,13 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const showHeight = isVis('height');
         const showSlant = isVis('slant_height');
 
+        const bottomConeY = botY + rY;
+        const maxConeArrowY = Math.max(bottomConeY, botY + 28);
+        const bottomMetricsY = maxConeArrowY + 54;
+        const totalHeight = bottomMetricsY + 44;
+
         return {
-          viewBox: '20 20 460 380',
+          viewBox: `20 15 460 ${totalHeight}`,
           elements: (
             <>
               {/* Back dashed ellipse half */}
@@ -1918,8 +2115,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
               {/* Slant Height dimension line along right edge */}
               {renderDimensionLine('slant_height', pApex, pRight, -38)}
 
-              {/* Volume Badge */}
-              {renderAreaBadge(cX + 20, botY - 35, 'surface_area', 'volume')}
+              {/* Surface Area and Volume strictly below the figure and below any other data or arrow */}
+              {renderBottomMetrics(cX, bottomMetricsY, { areaId: 'surface_area', perimeterId: 'volume' })}
             </>
           ),
         };
