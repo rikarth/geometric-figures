@@ -1,6 +1,6 @@
 import React, { useRef, useId, useMemo } from 'react';
 import { FigureDefinition, Parameter, Unit, ThemeConfig, LabelStyle } from '../types/geometry';
-import { formatLabel, formatValue } from '../utils/geometryMath';
+import { formatLabel as mathFormatLabel, formatValue } from '../utils/geometryMath';
 
 interface FigureRendererProps {
   figure: FigureDefinition;
@@ -13,6 +13,7 @@ interface FigureRendererProps {
   onHoverParam?: (id: string | null) => void;
   onToggleParamVisibility?: (id: string) => void;
   onSelectParam?: (id: string) => void;
+  roundZeroDecimals?: boolean;
 }
 
 interface Point {
@@ -31,11 +32,15 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
   onHoverParam,
   onToggleParamVisibility,
   onSelectParam,
+  roundZeroDecimals = false,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const patternId = useId();
   const arrowMarkerId = useId();
   const arrowRevMarkerId = useId();
+
+  const formatLabel = (param: Parameter, u = unit, ls = labelStyle) =>
+    mathFormatLabel(param, u, ls, roundZeroDecimals);
 
   const paramMap = useMemo(() => {
     const map = new Map<string, Parameter>();
@@ -321,7 +326,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
     const isPerimHovered = hoveredParamId === perimParamId;
 
     const formatMetricText = (param: Parameter) => {
-      const valStr = formatValue(param.value, param.type, unit, param.precision ?? 2);
+      const valStr = formatValue(param.value, param.type, unit, param.precision ?? 2, roundZeroDecimals);
       if (labelStyle === 'value_only') {
         return `${param.name}: ${valStr}`;
       }

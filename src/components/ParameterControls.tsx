@@ -1,13 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Parameter, Unit, LabelStyle } from '../types/geometry';
 import {
   Eye,
   EyeOff,
   RotateCcw,
-  Sliders,
-  CheckSquare,
-  Square,
-  Sparkles,
+  Hash,
 } from 'lucide-react';
 
 interface ParameterControlsProps {
@@ -22,6 +19,8 @@ interface ParameterControlsProps {
   hoveredParamId: string | null;
   onHoverParam: (id: string | null) => void;
   onResetDefaults: () => void;
+  roundZeroDecimals: boolean;
+  onToggleRoundZeroDecimals: (round: boolean) => void;
 }
 
 const AVAILABLE_UNITS: { id: Unit; label: string; desc: string }[] = [
@@ -31,6 +30,84 @@ const AVAILABLE_UNITS: { id: Unit; label: string; desc: string }[] = [
   { id: 'in', label: 'in', desc: 'Inches' },
   { id: 'ft', label: 'ft', desc: 'Feet' },
 ];
+
+const ParameterInputField: React.FC<{
+  param: Parameter;
+  unitTag: string;
+  roundZeroDecimals: boolean;
+  onParamChange: (id: string, value: number) => void;
+}> = ({ param, unitTag, roundZeroDecimals, onParamChange }) => {
+  const [localText, setLocalText] = useState<string>('');
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isFocused) {
+      if (roundZeroDecimals) {
+        setLocalText(Math.round(param.value).toString());
+      } else {
+        const p = param.precision ?? 2;
+        const rounded = Number(param.value.toFixed(p));
+        setLocalText(rounded.toString());
+      }
+    }
+  }, [param.value, roundZeroDecimals, param.precision, isFocused]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setLocalText(val);
+    const parsed = parseFloat(val);
+    if (!isNaN(parsed)) {
+      const finalVal = roundZeroDecimals ? Math.round(parsed) : parsed;
+      onParamChange(param.id, finalVal);
+    }
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    const parsed = parseFloat(localText);
+    if (isNaN(parsed)) {
+      setLocalText(
+        roundZeroDecimals
+          ? Math.round(param.value).toString()
+          : Number(param.value.toFixed(param.precision ?? 2)).toString()
+      );
+    } else {
+      const clamped = Math.max(param.min ?? 0.01, Math.min(param.max ?? 1000, parsed));
+      const finalVal = roundZeroDecimals
+        ? Math.round(clamped)
+        : Number(clamped.toFixed(param.precision ?? 2));
+      onParamChange(param.id, finalVal);
+      setLocalText(finalVal.toString());
+    }
+  };
+
+  const stepVal = roundZeroDecimals || param.type === 'count' ? '1' : '0.01';
+
+  return (
+    <div className="relative flex-1">
+      <input
+        type="number"
+        step={stepVal}
+        min={param.min ?? 0.01}
+        max={param.max ?? 500}
+        disabled={param.isDerived}
+        value={localText}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleBlur}
+        onChange={handleChange}
+        placeholder="0.00"
+        className={`w-full py-1.5 pl-2.5 pr-10 text-xs font-mono font-semibold rounded-md border transition-colors ${
+          param.isDerived
+            ? 'bg-slate-100/80 border-slate-200 text-slate-600 cursor-not-allowed'
+            : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-2xs'
+        }`}
+      />
+      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-mono text-slate-400 pointer-events-none">
+        {unitTag}
+      </span>
+    </div>
+  );
+};
 
 export const ParameterControls: React.FC<ParameterControlsProps> = ({
   parameters,
@@ -44,6 +121,8 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
   hoveredParamId,
   onHoverParam,
   onResetDefaults,
+  roundZeroDecimals,
+  onToggleRoundZeroDecimals,
 }) => {
   const visibleCount = parameters.filter((p) => p.isVisible).length;
   const allVisible = visibleCount === parameters.length;
@@ -97,7 +176,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
         <div className="flex items-center gap-1">
           <button
             onClick={() => onLabelStyleChange('symbol_and_value')}
-            title="Format: c = 10 cm"
+            title="Format: c = 10.00 cm"
             className={`px-2 py-1 text-[11px] font-mono rounded transition-colors ${
               labelStyle === 'symbol_and_value'
                 ? 'bg-blue-100 text-blue-800 font-semibold'
@@ -108,7 +187,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
           </button>
           <button
             onClick={() => onLabelStyleChange('value_only')}
-            title="Format: 10 cm"
+            title="Format: 10.00 cm"
             className={`px-2 py-1 text-[11px] font-mono rounded transition-colors ${
               labelStyle === 'value_only'
                 ? 'bg-blue-100 text-blue-800 font-semibold'
@@ -118,6 +197,38 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
             10 {unit}
           </button>
         </div>
+      </div>
+
+      {/* Decimal Rounding Checkbox (Zero Decimals vs 2 Decimals) */}
+      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 transition-colors hover:border-slate-300">
+        <label className="flex items-center gap-2.5 cursor-pointer select-none flex-1">
+          <input
+            type="checkbox"
+            checked={roundZeroDecimals}
+            onChange={(e) => onToggleRoundZeroDecimals(e.target.checked)}
+            className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 accent-blue-600 cursor-pointer"
+          />
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+              <Hash className="w-3.5 h-3.5 text-blue-600" />
+              Round with zero decimals
+            </span>
+            <span className="text-[11px] text-slate-500">
+              {roundZeroDecimals
+                ? 'Displaying integer values (e.g. 10 cm, 84 cm²)'
+                : 'Displaying and editable to two decimals (0.01 precision)'}
+            </span>
+          </div>
+        </label>
+        <span
+          className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded shrink-0 ${
+            roundZeroDecimals
+              ? 'bg-amber-100 text-amber-800 border border-amber-300'
+              : 'bg-blue-50 text-blue-700 border border-blue-200'
+          }`}
+        >
+          {roundZeroDecimals ? '0 DEC' : '0.00 DEC'}
+        </span>
       </div>
 
       {/* Parameters List */}
@@ -187,8 +298,8 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                         calculated
                       </span>
                     ) : (
-                      <span className="text-[10px] text-emerald-600 font-mono">
-                        input
+                      <span className="text-[10px] text-emerald-600 font-mono font-medium">
+                        editable
                       </span>
                     )}
                   </div>
@@ -196,30 +307,12 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
 
                 {/* Row 2: Input Field and Slider (if editable) */}
                 <div className="flex items-center gap-2 pl-7">
-                  <div className="relative flex-1">
-                    <input
-                      type="number"
-                      step={param.step ?? 0.1}
-                      min={param.min ?? 0.01}
-                      max={param.max ?? 500}
-                      disabled={param.isDerived}
-                      value={Number(param.value.toFixed(param.precision ?? 2))}
-                      onChange={(e) => {
-                        const val = parseFloat(e.target.value);
-                        if (!isNaN(val)) {
-                          onParamChange(param.id, val);
-                        }
-                      }}
-                      className={`w-full py-1.5 pl-2.5 pr-10 text-xs font-mono font-semibold rounded-md border transition-colors ${
-                        param.isDerived
-                          ? 'bg-slate-100/80 border-slate-200 text-slate-600 cursor-not-allowed'
-                          : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
-                      }`}
-                    />
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-mono text-slate-400 pointer-events-none">
-                      {unitTag}
-                    </span>
-                  </div>
+                  <ParameterInputField
+                    param={param}
+                    unitTag={unitTag}
+                    roundZeroDecimals={roundZeroDecimals}
+                    onParamChange={onParamChange}
+                  />
 
                   {/* Slider for quick intuitive tweaking if editable */}
                   {!param.isDerived && param.min !== undefined && param.max !== undefined && (
@@ -227,9 +320,12 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                       type="range"
                       min={param.min}
                       max={param.max}
-                      step={param.step ?? 0.5}
-                      value={param.value}
-                      onChange={(e) => onParamChange(param.id, parseFloat(e.target.value))}
+                      step={roundZeroDecimals || param.type === 'count' ? 1 : (param.step ?? 0.01)}
+                      value={roundZeroDecimals ? Math.round(param.value) : param.value}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        onParamChange(param.id, roundZeroDecimals ? Math.round(val) : val);
+                      }}
                       className="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                     />
                   )}

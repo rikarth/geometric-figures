@@ -1,12 +1,14 @@
 import React from 'react';
 import { X, BookOpen } from 'lucide-react';
 import { FigureDefinition, Unit } from '../types/geometry';
+import { formatValue } from '../utils/geometryMath';
 
 interface FormulasReferenceModalProps {
   isOpen: boolean;
   onClose: () => void;
   figure: FigureDefinition;
   unit: Unit;
+  roundZeroDecimals?: boolean;
 }
 
 export const FormulasReferenceModal: React.FC<FormulasReferenceModalProps> = ({
@@ -14,6 +16,7 @@ export const FormulasReferenceModal: React.FC<FormulasReferenceModalProps> = ({
   onClose,
   figure,
   unit,
+  roundZeroDecimals = false,
 }) => {
   if (!isOpen) return null;
 
@@ -49,11 +52,7 @@ export const FormulasReferenceModal: React.FC<FormulasReferenceModalProps> = ({
                     <span className="text-slate-700 font-medium">{p.name}</span>
                   </div>
                   <span className="font-mono text-slate-500 shrink-0">
-                    {p.type === 'length' && `${p.value.toFixed(1)} ${unit}`}
-                    {p.type === 'angle' && `${p.value.toFixed(1)}°`}
-                    {p.type === 'area' && `${p.value.toFixed(1)} ${unit}²`}
-                    {p.type === 'volume' && `${p.value.toFixed(1)} ${unit}³`}
-                    {p.type === 'count' && p.value}
+                    {formatValue(p.value, p.type, unit, p.precision ?? 2, roundZeroDecimals)}
                   </span>
                 </div>
               ))}

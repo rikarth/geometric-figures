@@ -25,6 +25,7 @@ import {
   Sliders,
   CheckCircle2,
   Compass,
+  Hash,
 } from 'lucide-react';
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
   const [gridType, setGridType] = useState<'lines' | 'dots' | 'none'>('lines');
   const [labelStyle, setLabelStyle] = useState<LabelStyle>('symbol_and_value');
   const [hoveredParamId, setHoveredParamId] = useState<string | null>(null);
+  const [roundZeroDecimals, setRoundZeroDecimals] = useState<boolean>(false);
 
   // Modals
   const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
@@ -62,7 +64,7 @@ export default function App() {
           return p;
         });
 
-        const recomputed = recalculateParameters(fig.id, updatedParams);
+        const recomputed = recalculateParameters(fig.id, updatedParams, paramId);
         return { ...fig, parameters: recomputed };
       })
     );
@@ -193,6 +195,8 @@ export default function App() {
               hoveredParamId={hoveredParamId}
               onHoverParam={setHoveredParamId}
               onResetDefaults={handleResetDefaults}
+              roundZeroDecimals={roundZeroDecimals}
+              onToggleRoundZeroDecimals={setRoundZeroDecimals}
             />
           </div>
         </section>
@@ -280,6 +284,20 @@ export default function App() {
                 })}
               </div>
 
+              {/* Zero Decimals Quick Toggle Button */}
+              <button
+                onClick={() => setRoundZeroDecimals((prev) => !prev)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-lg border transition-colors ${
+                  roundZeroDecimals
+                    ? 'bg-amber-500 text-white border-amber-600 shadow-2xs font-semibold'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+                title="Toggle between whole numbers (0 decimals) and two decimals (0.01)"
+              >
+                <Hash className="w-3.5 h-3.5" />
+                <span>{roundZeroDecimals ? '0 Decimals' : '2 Decimals'}</span>
+              </button>
+
               {/* Save Image Action Button */}
               <button
                 onClick={() => setExportModalOpen(true)}
@@ -303,6 +321,7 @@ export default function App() {
               hoveredParamId={hoveredParamId}
               onHoverParam={setHoveredParamId}
               onToggleParamVisibility={handleToggleVisibility}
+              roundZeroDecimals={roundZeroDecimals}
             />
           </div>
 
@@ -344,7 +363,7 @@ export default function App() {
                         {areaParam.name}:
                       </span>
                       <strong className="font-bold text-blue-700">
-                        {formatValue(areaParam.value, areaParam.type, unit, areaParam.precision ?? 2)}
+                        {formatValue(areaParam.value, areaParam.type, unit, areaParam.precision ?? 2, roundZeroDecimals)}
                       </strong>
                       <span className="text-[10px] text-slate-400 font-sans">
                         {areaParam.isVisible ? '✓ in image' : 'hidden'}
@@ -367,7 +386,7 @@ export default function App() {
                         {perimParam.name}:
                       </span>
                       <strong className="font-bold text-emerald-700">
-                        {formatValue(perimParam.value, perimParam.type, unit, perimParam.precision ?? 2)}
+                        {formatValue(perimParam.value, perimParam.type, unit, perimParam.precision ?? 2, roundZeroDecimals)}
                       </strong>
                       <span className="text-[10px] text-slate-400 font-sans">
                         {perimParam.isVisible ? '✓ in image' : 'hidden'}
@@ -418,6 +437,7 @@ export default function App() {
         onClose={() => setFormulasModalOpen(false)}
         figure={currentFigure}
         unit={unit}
+        roundZeroDecimals={roundZeroDecimals}
       />
     </div>
   );
