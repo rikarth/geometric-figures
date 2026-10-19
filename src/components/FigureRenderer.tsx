@@ -1670,14 +1670,25 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         const bP2 = pts[(bottomIdx + 1) % n];
         const midBottom = { x: (bP1.x + bP2.x) / 2, y: (bP1.y + bP2.y) / 2 };
 
+        // Ensure side length dimension line and label are placed OUTSIDE the polygon
+        const edgeDx = bP2.x - bP1.x;
+        const edgeDy = bP2.y - bP1.y;
+        const edgeLen = Math.hypot(edgeDx, edgeDy);
+        const normX = -edgeDy / edgeLen;
+        const normY = edgeDx / edgeLen;
+        // Dot product with outward vector from center:
+        const outDot = normX * (midBottom.x - cX) + normY * (midBottom.y - cY);
+        const outwardSideOffset = outDot >= 0 ? 38 : -38;
+
         const showApothem = isVis('apothem');
         const showCircumradius = isVis('circumradius');
         const showFullWidth = isVis('full_width');
         const showFullHeight = isVis('full_height');
 
-        // Dynamically compute max Y of all vertices & bottom side dimension arrow
+        // Dynamically compute max Y of all vertices & bottom side dimension arrow placed outside
         const maxVertexY = maxY;
-        const maxPolygonArrowY = Math.max(maxVertexY, midBottom.y + 44);
+        const sideDimY = midBottom.y + Math.max(0, normY * outwardSideOffset);
+        const maxPolygonArrowY = Math.max(maxVertexY, sideDimY + 20);
         const bottomMetricsY = maxPolygonArrowY + 54;
         const totalHeight = bottomMetricsY + 44;
 
@@ -1802,8 +1813,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
                 </g>
               )}
 
-              {/* Side length dimension along bottom edge */}
-              {renderDimensionLine('side_length', bP1, bP2, 36)}
+              {/* Side length dimension along bottom edge - placed OUTSIDE the figure */}
+              {renderDimensionLine('side_length', bP1, bP2, outwardSideOffset)}
 
               {/* Area and Perimeter strictly below the figure and below any other data or arrow */}
               {renderBottomMetrics(cX, bottomMetricsY)}
