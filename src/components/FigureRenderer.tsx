@@ -2181,6 +2181,8 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         {/* Background Grid */}
         {showGrid && gridType !== 'none' && (
           <rect
+            id="figure-grid-bg"
+            className="figure-grid-bg"
             x="-500"
             y="-500"
             width="2000"
@@ -2190,7 +2192,9 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
         )}
 
         {/* Rendered Geometry */}
-        {renderedContent.elements}
+        <g id="figure-content-root" className="figure-content-root">
+          {renderedContent.elements}
+        </g>
       </svg>
     </div>
   );
