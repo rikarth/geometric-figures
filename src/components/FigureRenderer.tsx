@@ -14,6 +14,7 @@ interface FigureRendererProps {
   onToggleParamVisibility?: (id: string) => void;
   onSelectParam?: (id: string) => void;
   roundZeroDecimals?: boolean;
+  emptyLabels?: boolean;
 }
 
 interface Point {
@@ -33,6 +34,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
   onToggleParamVisibility,
   onSelectParam,
   roundZeroDecimals = false,
+  emptyLabels = false,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const patternId = useId();
@@ -40,7 +42,7 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
   const arrowRevMarkerId = useId();
 
   const formatLabel = (param: Parameter, u = unit, ls = labelStyle) =>
-    mathFormatLabel(param, u, ls, roundZeroDecimals);
+    mathFormatLabel(param, u, ls, roundZeroDecimals, emptyLabels);
 
   const paramMap = useMemo(() => {
     const map = new Map<string, Parameter>();
@@ -94,10 +96,14 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
     const midY = (dim1.y + dim2.y) / 2;
 
     const isHovered = hoveredParamId === paramId;
-    const labelText = options?.overrideLabel ?? formatLabel(param, unit, labelStyle);
+    const labelText = emptyLabels
+      ? (labelStyle === 'value_only' ? '' : `${param.symbol} = ____`)
+      : (options?.overrideLabel ?? formatLabel(param, unit, labelStyle));
 
     // Approximate label width based on string length
-    const labelBoxW = Math.max(38, labelText.length * 7.5 + 14);
+    const labelBoxW = emptyLabels
+      ? (labelText ? Math.max(54, labelText.length * 7.5 + 24) : 48)
+      : Math.max(38, labelText.length * 7.5 + 14);
     const labelBoxH = 22;
 
     const elementKey = options?.keySuffix ? `dim-${paramId}-${options.keySuffix}` : `dim-${paramId}`;
@@ -192,7 +198,9 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
     if (!param.isVisible) return null;
 
     const isHovered = hoveredParamId === paramId;
-    const labelText = formatLabel(param, unit, labelStyle);
+    const labelText = emptyLabels
+      ? (labelStyle === 'value_only' ? '' : `${param.symbol} = ____`)
+      : formatLabel(param, unit, labelStyle);
     const elementKey = keySuffix ? `angle-${paramId}-${keySuffix}` : `angle-${paramId}`;
 
     if (isRightAngle) {
@@ -248,7 +256,9 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
     const labelX = vertex.x + Math.cos(midAngle) * labelDist;
     const labelY = vertex.y + Math.sin(midAngle) * labelDist;
 
-    const labelBoxW = Math.max(34, labelText.length * 7.2 + 10);
+    const labelBoxW = emptyLabels
+      ? (labelText ? Math.max(46, labelText.length * 7.2 + 20) : 40)
+      : Math.max(34, labelText.length * 7.2 + 10);
     const labelBoxH = 20;
 
     return (
@@ -326,6 +336,15 @@ export const FigureRenderer: React.FC<FigureRendererProps> = ({
     const isPerimHovered = hoveredParamId === perimParamId;
 
     const formatMetricText = (param: Parameter) => {
+      if (emptyLabels) {
+        if (labelStyle === 'value_only') {
+          return `${param.name}: _______`;
+        }
+        if (labelStyle === 'full_name_and_value') {
+          return `${param.name} = _______`;
+        }
+        return `${param.name} (${param.symbol}) = _______`;
+      }
       const valStr = formatValue(param.value, param.type, unit, param.precision ?? 2, roundZeroDecimals);
       if (labelStyle === 'value_only') {
         return `${param.name}: ${valStr}`;

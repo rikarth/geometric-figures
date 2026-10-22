@@ -5,6 +5,7 @@ import {
   EyeOff,
   RotateCcw,
   Hash,
+  FileQuestion,
 } from 'lucide-react';
 
 interface ParameterControlsProps {
@@ -21,6 +22,8 @@ interface ParameterControlsProps {
   onResetDefaults: () => void;
   roundZeroDecimals: boolean;
   onToggleRoundZeroDecimals: (round: boolean) => void;
+  emptyLabels: boolean;
+  onToggleEmptyLabels: (empty: boolean) => void;
 }
 
 const AVAILABLE_UNITS: { id: Unit; label: string; desc: string }[] = [
@@ -123,6 +126,8 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
   onResetDefaults,
   roundZeroDecimals,
   onToggleRoundZeroDecimals,
+  emptyLabels,
+  onToggleEmptyLabels,
 }) => {
   const visibleCount = parameters.filter((p) => p.isVisible).length;
   const allVisible = visibleCount === parameters.length;
@@ -176,25 +181,25 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
         <div className="flex items-center gap-1">
           <button
             onClick={() => onLabelStyleChange('symbol_and_value')}
-            title="Format: c = 10.00 cm"
+            title={emptyLabels ? 'Format: c = ____ (fill-in blank)' : 'Format: c = 10.00 cm'}
             className={`px-2 py-1 text-[11px] font-mono rounded transition-colors ${
               labelStyle === 'symbol_and_value'
                 ? 'bg-blue-100 text-blue-800 font-semibold'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            c = 10 {unit}
+            {emptyLabels ? 'c = ____' : `c = 10 ${unit}`}
           </button>
           <button
             onClick={() => onLabelStyleChange('value_only')}
-            title="Format: 10.00 cm"
+            title={emptyLabels ? 'Format: [ empty box ]' : 'Format: 10.00 cm'}
             className={`px-2 py-1 text-[11px] font-mono rounded transition-colors ${
               labelStyle === 'value_only'
                 ? 'bg-blue-100 text-blue-800 font-semibold'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            10 {unit}
+            {emptyLabels ? '[ blank ]' : `10 ${unit}`}
           </button>
         </div>
       </div>
@@ -228,6 +233,38 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
           }`}
         >
           {roundZeroDecimals ? '0 DEC' : '0.00 DEC'}
+        </span>
+      </div>
+
+      {/* Empty / Blank Labels Checkbox (Print & Worksheet Mode without Clues) */}
+      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 transition-colors hover:border-slate-300">
+        <label className="flex items-center gap-2.5 cursor-pointer select-none flex-1">
+          <input
+            type="checkbox"
+            checked={emptyLabels}
+            onChange={(e) => onToggleEmptyLabels(e.target.checked)}
+            className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 border-slate-300 accent-purple-600 cursor-pointer"
+          />
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+              <FileQuestion className="w-3.5 h-3.5 text-purple-600" />
+              Empty labels on drawing (print without clues)
+            </span>
+            <span className="text-[11px] text-slate-500">
+              {emptyLabels
+                ? 'Labels on drawing are blank (fill-in blanks for student exercises)'
+                : 'Drawing labels display numbers and unit measurements'}
+            </span>
+          </div>
+        </label>
+        <span
+          className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded shrink-0 ${
+            emptyLabels
+              ? 'bg-purple-100 text-purple-800 border border-purple-300'
+              : 'bg-slate-100 text-slate-600 border border-slate-200'
+          }`}
+        >
+          {emptyLabels ? 'BLANK (NO CLUES)' : 'WITH VALUES'}
         </span>
       </div>
 

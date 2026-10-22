@@ -618,8 +618,19 @@ export function formatLabel(
   param: Parameter,
   unit: Unit,
   style: LabelStyle = 'symbol_and_value',
-  roundZeroDecimals = false
+  roundZeroDecimals = false,
+  emptyLabels = false
 ): string {
+  if (emptyLabels) {
+    if (style === 'value_only') {
+      return '';
+    }
+    if (style === 'full_name_and_value') {
+      return `${param.name}: ____`;
+    }
+    return `${param.symbol} = ____`;
+  }
+
   const precision = roundZeroDecimals ? 0 : (param.precision ?? 2);
   const valStr = formatValue(param.value, param.type, unit, precision, roundZeroDecimals);
 
